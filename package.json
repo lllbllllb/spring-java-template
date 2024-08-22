@@ -1,0 +1,39 @@
+{
+  "name": "test-java-spring-template",
+  "version": "0.0.1",
+  "scripts": {
+    "test:clean": "rimraf test/project/",
+    "test:generate": "asyncapi generate fromTemplate test/fixtures/asyncapi.yml ./ -o test/project -p javaPackage=com.example.demo --force-write",
+    "test:start": "python test/project/test.java",
+    "test": "npm run test:clean && npm run test:generate"
+  },
+  "keywords": [],
+  "author": "lllbllllb",
+  "description": "test AsyncAPI template",
+  "generator": {
+    "renderer": "react",
+    "apiVersion": "v3",
+    "generator": ">=1.10.0 <=2.3.0",
+    "supportedProtocols": [
+      "kafka"
+    ],
+    "parameters": {
+      "javaPackage": {
+        "description": "Java package",
+        "required": true
+      }
+    }
+  },
+  "dependencies": {
+    "@asyncapi/generator-react-sdk": "^1.1.0",
+    "@asyncapi/modelina": "^3.7.0",
+    "@types/node": "^22.4.0",
+    "@asyncapi/generator": "^2.3.0",
+    "@asyncapi/parser": "^3.2.2",
+    "@asyncapi/generator-hooks": "^0.1.0"
+  },
+  "devDependencies": {
+    "debug": "^4.3.6",
+    "rimraf": "^5.0.0"
+  }
+}
