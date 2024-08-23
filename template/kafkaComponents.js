@@ -1,10 +1,11 @@
 import { File, Text, render, Indent } from '@asyncapi/generator-react-sdk';
-import { JavaKafkaListenerGenerator } from "../lib/JavaKafkaListenerGenerator";
-import { FormatHelpers } from "@asyncapi/modelina";
+import { JavaKafkaListenerGenerator } from "../lib/generator/JavaKafkaListenerGenerator";
+import { JavaKafkaPublisherGenerator } from "../lib/generator/JavaKafkaPublisherGenerator";
 
 const {getDefaultJavaPackage, getFilePackage} = require('../lib/util.js');
 
 const javaKafkaListenerGenerator = new JavaKafkaListenerGenerator();
+const javaKafkaPublisherGenerator = new JavaKafkaPublisherGenerator();
 
 /**
  * @typedef RenderArgument
@@ -22,6 +23,11 @@ export default async function schemaRender({asyncapi, params}) {
     const files = [];
 
     javaKafkaListenerGenerator.generate(asyncapi, params).forEach(model => {
+        const file = getModelFile(model, baseJavaPackage);
+        files.push(file);
+    });
+
+    javaKafkaPublisherGenerator.generate(asyncapi, params).forEach(model => {
         const file = getModelFile(model, baseJavaPackage);
         files.push(file);
     });

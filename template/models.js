@@ -47,9 +47,6 @@ export default async function schemaRender({asyncapi, params}) {
     const files = [];
 
     for (const model of models) {
-
-        // var topics = createSubscribers(asyncapi.channels().filterBySend());
-
         files.push(getModelFile(model, baseJavaPackage));
     }
 
