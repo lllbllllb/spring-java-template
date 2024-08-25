@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { getDefaultJavaPackage, getDefaultJavaPackageDir } = require('../lib/util.js');
+const {getDefaultJavaPackage, getDefaultJavaPackageDir} = require('../lib/util.js');
+const {getSubDirs} = require('../lib/state.js');
 
 module.exports = {
     'generate:after': generator => {
@@ -11,18 +12,17 @@ module.exports = {
         const defaultJavaPackage = getDefaultJavaPackage(asyncapi, params);
         const defaultJavaPackageDir = getDefaultJavaPackageDir(generator, defaultJavaPackage);
 
-        // move models from Modelina
-        moveAllFiles(sourcePath, defaultJavaPackageDir);
-
+        moveComponents(sourcePath, defaultJavaPackageDir);
     }
 };
 
-function moveAllFiles(oldDirectory, newDirectory) {
-    fs.readdir(oldDirectory, (err, files) => {
+function moveComponents(sourcePath, defaultJavaPackageDir) {
+
+    Object.entries(getSubDirs()).forEach(([subDir, files]) => {
         files.forEach(file => {
-            moveFile(oldDirectory, newDirectory, file);
-        });
-    });
+            moveFile(sourcePath, `${defaultJavaPackageDir}/${subDir}`, file)
+        })
+    })
 }
 
 function moveFile(oldDirectory, newDirectory, fileName) {

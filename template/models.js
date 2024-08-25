@@ -8,6 +8,7 @@ import {
 } from '@asyncapi/modelina';
 
 const { getDefaultJavaPackage, getFilePackage } = require('../lib/util.js');
+const {addFile} = require('../lib/state.js');
 
 const javaGenerator = new JavaGenerator({
     collectionType: "List",
@@ -56,8 +57,10 @@ export default async function schemaRender({asyncapi, params}) {
 function getModelFile(model, baseJavaPackage) {
     const name = `${FormatHelpers.toPascalCase(model.modelName)}.java`;
 
+    addFile('model', name);
+
     return <File name={name}>
-        <Text newLines={2}>{getFilePackage(baseJavaPackage)}</Text>
+        <Text newLines={2}>{getFilePackage(baseJavaPackage, 'model')}</Text>
         <List list={model.dependencies} newLines={1}/>
         <Text newLines={2}>{model.result} </Text>
     </File>;
