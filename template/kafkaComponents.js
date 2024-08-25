@@ -1,11 +1,7 @@
-import { File, Text, render, Indent } from '@asyncapi/generator-react-sdk';
-import { JavaKafkaListenerGenerator } from "../lib/generator/JavaKafkaListenerGenerator";
-import { JavaKafkaPublisherGenerator } from "../lib/generator/JavaKafkaPublisherGenerator";
+import { File, Text } from '@asyncapi/generator-react-sdk';
+import { JavaKafkaGenerator } from "../lib/generator/JavaKafkaGenerator";
 
 const {getDefaultJavaPackage, getFilePackage} = require('../lib/util.js');
-
-const javaKafkaListenerGenerator = new JavaKafkaListenerGenerator();
-const javaKafkaPublisherGenerator = new JavaKafkaPublisherGenerator();
 
 /**
  * @typedef RenderArgument
@@ -19,20 +15,10 @@ const javaKafkaPublisherGenerator = new JavaKafkaPublisherGenerator();
  * @returns
  */
 export default async function schemaRender({asyncapi, params}) {
-    const baseJavaPackage = getDefaultJavaPackage(asyncapi, params);
-    const files = [];
+    const baseJavaPackage = getDefaultJavaPackage(asyncapi, params) + '.generated';
 
-    javaKafkaListenerGenerator.generate(asyncapi, params).forEach(model => {
-        const file = getModelFile(model, baseJavaPackage);
-        files.push(file);
-    });
-
-    javaKafkaPublisherGenerator.generate(asyncapi, params).forEach(model => {
-        const file = getModelFile(model, baseJavaPackage);
-        files.push(file);
-    });
-
-    return files;
+    return new JavaKafkaGenerator(asyncapi).generate()
+        .map(model => getModelFile(model, baseJavaPackage));
 }
 
 function getModelFile(model, baseJavaPackage) {
