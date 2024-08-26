@@ -23,7 +23,7 @@ export default async function schemaRender({asyncapi, params}) {
 }
 
 function getModelFile(model, baseJavaPackage) {
-    const subDir = model.model.name;
+    const subDir = model.model.name.toLowerCase();
     const name = `${model.modelName}.java`;
 
     addFile(subDir, name);
