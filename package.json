@@ -1,5 +1,5 @@
 {
-  "name": "test-java-spring-template",
+  "name": "spring-java-template",
   "version": "0.0.1",
   "scripts": {
     "test:clean": "rimraf test/project/",

@@ -63,7 +63,7 @@ function getModelFile(model, baseJavaPackage) {
         <Text newLines={2}>{getFilePackage(baseJavaPackage, 'model')}</Text>
         <Text>{'import javax.annotation.processing.Generated;'}</Text>
         <List list={model.dependencies} newLines={1}/>
-        <Text>{`@Generated(value="com.asyncapi.generator.template.spring", date="${new Date().toUTCString()}")`}</Text>
+        <Text>{`@Generated(value="com.asyncapi.generator.spring.java.template", date="${new Date().toUTCString()}")`}</Text>
         <Text newLines={2}>{model.result} </Text>
     </File>;
 }
