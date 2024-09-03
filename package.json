@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "test:clean": "rimraf test/project/",
-    "test:generate": "asyncapi generate fromTemplate test/fixtures/asyncapi.yml ./ -o test/project -p javaPackage=com.example.demo --force-write",
+    "test:generate": "asyncapi generate fromTemplate test/fixtures/asyncapi.yml ./ -o test/project/src/main/java -p javaPackage=com.example.demo --force-write",
     "test:start": "python test/project/test.java",
     "test": "npm run test:clean && npm run test:generate"
   },
