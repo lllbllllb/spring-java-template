@@ -1,4 +1,4 @@
-import { File, Text, render, Indent } from '@asyncapi/generator-react-sdk';
+import { File, Text } from '@asyncapi/generator-react-sdk';
 import {
     FormatHelpers,
     JAVA_COMMON_PRESET,
@@ -11,6 +11,11 @@ const { getDefaultJavaPackage, getFilePackage } = require('../lib/util.js');
 const {addFile} = require('../lib/state.js');
 
 const javaGenerator = new JavaGenerator({
+    processorOptions: {
+        interpreter: {
+            ignoreAdditionalProperties: true
+        }
+    },
     collectionType: "List",
     presets: [
         {
