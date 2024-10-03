@@ -7,7 +7,7 @@ import {
     JavaGenerator
 } from '@asyncapi/modelina';
 
-const { getDefaultJavaPackage, getFilePackage } = require('../lib/util.js');
+const {getDefaultJavaPackage, getFilePackage} = require('../lib/util.js');
 const {addFile} = require('../lib/state.js');
 
 const javaGenerator = new JavaGenerator({
@@ -68,16 +68,26 @@ function getModelFile(model, baseJavaPackage) {
         <Text newLines={2}>{getFilePackage(baseJavaPackage, 'model')}</Text>
         <Text>{'import javax.annotation.processing.Generated;'}</Text>
         <List list={model.dependencies} newLines={1}/>
-        <Text>@lombok.Getter</Text>
-        <Text>@lombok.Setter</Text>
-        <Text>@lombok.experimental.Accessors(fluent = true)</Text>
+        <LombokFluent result={model.result}/>
         <Text>{`@Generated(value="com.asyncapi.generator.spring.java.template", date="${new Date().toUTCString()}")`}</Text>
         <Text newLines={2}>{model.result} </Text>
     </File>;
 }
 
-function List({list = [], newLines=1}) {
+function List({list = [], newLines = 1}) {
     return <Text newLines={newLines}>
         {list.map(item => <Text newLines={1}>{item}</Text>)}
+    </Text>
+}
+
+function LombokFluent({result, newLines = 0}) {
+    if (result.match(/^\s*public\s+enum\s+.+$/gm)) {
+        return <Text newLines={0}/>
+    }
+
+    return <Text newLines={newLines}>
+        <Text newLines={1}>@lombok.Getter</Text>
+        <Text newLines={1}>@lombok.Setter</Text>
+        <Text newLines={1}>@lombok.experimental.Accessors(fluent=true)</Text>
     </Text>
 }
