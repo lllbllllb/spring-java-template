@@ -81,7 +81,8 @@ function List({list = [], newLines = 1}) {
 }
 
 function LombokFluent({result, newLines = 0}) {
-    if (result.match(/^\s*public\s+enum\s+.+$/gm)) {
+    if (result.match(/^\s*public\s+(enum|interface|record)\s+.+$/gm)
+    ) {
         return <Text newLines={0}/>
     }
 
