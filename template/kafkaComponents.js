@@ -26,6 +26,9 @@ function getModelFile(model, baseJavaPackage) {
     const subDir = model.model.name.toLowerCase();
     const name = `${model.modelName}.java`;
 
+    console.log(name + '\n');
+    console.log(model.result + '\n');
+
     addFile(subDir, name);
 
     return <File name={name}>
