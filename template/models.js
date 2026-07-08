@@ -11,6 +11,7 @@ const {getDefaultJavaPackage, getFilePackage} = require('../lib/util.js');
 const {addFile} = require('../lib/state.js');
 
 const javaGenerator = new JavaGenerator({
+    useOptionalForNullableProperties: true,
     processorOptions: {
         interpreter: {
             ignoreAdditionalProperties: true
