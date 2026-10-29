@@ -1,6 +1,6 @@
 {
   "name": "spring-java-template",
-  "version": "0.0.1",
+  "private": true,
   "scripts": {
     "test:clean": "rimraf test/project/",
     "test:generate": "asyncapi generate fromTemplate test/fixtures/asyncapi.yml ./ -o test/project/src/main/java -p javaPackage=com.example.demo --force-write",

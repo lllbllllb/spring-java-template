@@ -2,3 +2,6 @@
 /__transpiled/
 /node_modules/
 /.idea/
+/target/
+/.mvn/maven.config
+/.flattened-pom.xml
