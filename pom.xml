@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- No parent, like the two plugins: parent-bom pins spring-java-template.version, so the
+         template releases before parent-bom and cannot inherit from it. -->
+    <groupId>com.lllbllllb.plugins</groupId>
+    <artifactId>spring-java-template</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+    <name>Tool - Spring Java AsyncAPI Template</name>
+
+    <!-- The AsyncAPI generator template, published as a versioned artifact that the asyncapi mojo
+         resolves by spring-java-template.version, instead of fetching main from GitHub. It carries
+         two zips, attached to the pom:
+
+         - classifier `template`: package.json, the lock file, template/, hooks/ and lib/, with no
+           base directory. The generator transpiles the template into __transpiled/ inside the
+           template directory on every run, so the mojo unpacks this one fresh for every generation.
+         - classifier `node-modules`: the production dependencies, installed by `npm ci` without the
+           devDependencies under target/npm/, never in the working tree, so a developer's own
+           node_modules never reaches the artifact. Its entries keep their node_modules/ prefix:
+           a dependency that requires another resolves from its real path, so the unpacked tree has
+           to be a node_modules directory itself, and a template's node_modules link points at it.
+           Every .bin/ directory, the top one and the nested ones, is left out: they hold the only
+           symlinks npm creates, which a zip does not carry portably, and the generator runs no
+           dependency's binary. -->
+    <properties>
+        <!-- This project's version, and the template's only one: package.json carries none. A feature
+             worktree's .mvn/maven.config overrides it with -Drevision=<name>-SNAPSHOT; flatten writes
+             the literal into the installed pom. -->
+        <revision>0.0.1</revision>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Fixed entry times and a sorted entry order in both zips, so the same sources and the same
+             lock file give the same bytes: the mojo keys its shared copy of node-modules by the zip's
+             hash, and a reinstalled but unchanged <name>-SNAPSHOT then reuses it. -->
+        <project.build.outputTimestamp>2026-10-29T00:00:00Z</project.build.outputTimestamp>
+
+        <!-- npm on PATH: the agent images' node, Jenkins' `nodejs` tool. -->
+        <npm.executable>npm</npm.executable>
+
+        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
+        <flatten-maven-plugin.version>1.8.0</flatten-maven-plugin.version>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://nexus:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://nexus:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <!-- Resolves ${revision}, so no installed or deployed pom carries the placeholder. Same
+                 configuration as in api-generator and parent-bom. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- The manifest and the lock file, alone, into target/npm/: npm installs there and
+                 nowhere else. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>stage-npm-manifest</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/npm</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>package.json</include>
+                                        <include>package-lock.json</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Exactly what the lock file pins, production dependencies only. Install scripts run,
+                 as they do when the generator installs a template itself: some of them change the
+                 installed files. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>npm-ci-production</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <workingDirectory>${project.build.directory}/npm</workingDirectory>
+                            <arguments>
+                                <argument>ci</argument>
+                                <argument>--omit=dev</argument>
+                                <argument>--no-audit</argument>
+                                <argument>--no-fund</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-zips</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <inlineDescriptors>
+                                <inlineDescriptor>
+                                    <id>template</id>
+                                    <formats>
+                                        <format>zip</format>
+                                    </formats>
+                                    <includeBaseDirectory>false</includeBaseDirectory>
+                                    <fileSets>
+                                        <fileSet>
+                                            <directory>${project.basedir}</directory>
+                                            <outputDirectory>/</outputDirectory>
+                                            <includes>
+                                                <include>package.json</include>
+                                                <include>package-lock.json</include>
+                                                <include>template/**</include>
+                                                <include>hooks/**</include>
+                                                <include>lib/**</include>
+                                            </includes>
+                                        </fileSet>
+                                    </fileSets>
+                                </inlineDescriptor>
+                                <inlineDescriptor>
+                                    <id>node-modules</id>
+                                    <formats>
+                                        <format>zip</format>
+                                    </formats>
+                                    <includeBaseDirectory>false</includeBaseDirectory>
+                                    <fileSets>
+                                        <fileSet>
+                                            <directory>${project.build.directory}/npm</directory>
+                                            <outputDirectory>/</outputDirectory>
+                                            <useDefaultExcludes>false</useDefaultExcludes>
+                                            <includes>
+                                                <include>node_modules/**</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>**/.bin/**</exclude>
+                                            </excludes>
+                                        </fileSet>
+                                    </fileSets>
+                                </inlineDescriptor>
+                            </inlineDescriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
